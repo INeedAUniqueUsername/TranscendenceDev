@@ -1068,9 +1068,11 @@
 				))
 
 			(setq intRingerInstallDevicePrep (lambda (thisItem costToInstall isItemInCargo)
-				(block (desc rins cargoNeeded)
+				(block (desc rins cargoNeeded additionalFeeDesc)
 					(setq gCanInstall Nil)
 					(setq rins (objGetData gPlayerShip "rins"))
+
+					(setq additionalFeeDesc "")
 
 					(setq desc (cat "Balance: " rins " rin\n\n"))
 
@@ -1180,7 +1182,11 @@
 								(objEnumItems gPlayerShip gCriteria itemToRemove
 									(block Nil
 										(if (not costToInstall)
-											(setq gCost (add gCost (divide (multiply gMargin (itmGetInstallCost itemToRemove)) 1000)))
+											(block (costToRemove)
+												(setq costToRemove (divide (multiply gMargin (itmGetInstallCost itemToRemove)) 1000))
+												(setq gCost (add gCost costToRemove))
+												(setq additionalFeeDesc (cat " (including an additional removal fee of " costToRemove " rin)"))
+												)
 											)
 
 										(setq cargoNeeded (itmGetMass itemToRemove))
@@ -1208,7 +1214,7 @@
 								; We don't have enough
 								(gr gCost rins)
 									(block Nil
-										(setq desc (cat desc " for " gCost " rin. Unfortunately, you cannot afford the cost."))
+										(setq desc (cat desc " for " gCost " rin" additionalFeeDesc ". Unfortunately, you cannot afford the cost."))
 										(setq gCanInstall Nil)
 										)
 								
@@ -1217,7 +1223,8 @@
 									(setq desc (cat desc " at no charge."))
 
 								; We have enough
-								(setq desc (cat desc " for " gCost " rin."))
+								(setq desc (cat desc " for " gCost " rin" additionalFeeDesc "."
+									)
 								)
 
 							; Done

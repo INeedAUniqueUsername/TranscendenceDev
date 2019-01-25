@@ -1701,7 +1701,8 @@
 				;	desc:					Description of installation attempt
 
 				(block (totalCost desc descWarning itemToReplace
-
+					(additionalFeeDesc "")
+					
 					(thisItem (@ data 'item))
 					(targetObj (if (@ data 'targetObj) (@ data 'targetObj) gPlayerShip))
 					(installerObj (if (@ data 'installerObj) (@ data 'installerObj) gSource))
@@ -1992,8 +1993,12 @@
 							(if (and canInstall itemToReplace)
 								(block Nil
 									(if (not (@ data 'totalPrice))
-										(setq totalCost
-											(add totalCost (objGetItemProperty installerObj itemToReplace 'removeDevicePrice))
+										(block (costToRemove)
+											(setq costToRemove (objGetItemProperty installerObj itemToReplace 'removeDevicePrice))
+											(setq totalCost (add totalCost costToRemove))
+											(if (gr costToRemove 0)
+												(setq additionalFeeDesc " (including a removal fee of " (fmtCurrency currencyUsed costToRemove) ")")
+												)
 											)
 										)
 
@@ -2110,9 +2115,9 @@
 									(if (gr totalCost (objGetBalance targetObj currencyUsed))
 										(block Nil
 											(setq desc (or
-												(objTranslate installerObj 'rpg.cannotInstallDeviceBecauseCannotAfford { item:thisItem targetObj:targetObj cost:(fmtCurrency currencyUsed totalCost) itemToReplace:itemToReplace removeStatus:removeStatus })
-												(scrTranslate gScreen 'rpg.cannotInstallDeviceBecauseCannotAfford { item:thisItem targetObj:targetObj cost:(fmtCurrency currencyUsed totalCost) itemToReplace:itemToReplace removeStatus:removeStatus })
-												(cat desc " for " (fmtCurrency currencyUsed totalCost) ". Unfortunately, you cannot afford the cost.")
+												(objTranslate installerObj 'rpg.cannotInstallDeviceBecauseCannotAfford { item:thisItem targetObj:targetObj cost:(fmtCurrency currencyUsed totalCost) itemToReplace:itemToReplace removeStatus:removeStatus additionalFeeDesc:additionalFeeDesc })
+												(scrTranslate gScreen 'rpg.cannotInstallDeviceBecauseCannotAfford { item:thisItem targetObj:targetObj cost:(fmtCurrency currencyUsed totalCost) itemToReplace:itemToReplace removeStatus:removeStatus additionalFeeDesc:additionalFeeDesc })
+												(cat desc " for " (fmtCurrency currencyUsed totalCost) additionalFeeDesc ". Unfortunately, you cannot afford the cost.")
 												))
 											(setq canInstall Nil)
 											)

@@ -401,7 +401,7 @@
 					desc=			"There are no items here.">
 
 				<OnPaneInit>
-					(block (thisItem)
+					(block (thisItem installHint)
 						(setq thisItem (scrGetItem gScreen))
 						(if thisItem
 							(block (affordCount availCount currencyUsed desc fitCount)
@@ -461,6 +461,24 @@
 										(setq desc (cat desc "You have enough " (fmtCurrency currencyUsed True) " to buy " affordCount "."))
 									(and (gr availCount fitCount))
 										(setq desc (cat desc "You have enough room in your cargo hold to carry " fitCount "."))
+									)
+									
+								; Let the player know about Buy + Install
+								(if (and gInstallCriteria
+										(item
+											(setq installHint (intInstallDevicePrepEx
+												gItem								; item to install
+												0									; specify cost of 0 because we check later
+												Nil									; install cost margin
+												(objGetDefaultCurrency gSource)		; currency to use
+												gTechLevel							; max tech level
+												gInstallCriteria					; install criteria
+												gCheckMilitaryID					; check military ID
+												True								; item is in cargo
+												True))								; buy and install
+											0)
+										)
+									(setq desc (cat desc "\n\nYou may Buy &amp; Install this item in an open device slot for an installation fee of " (fmtCurrency currencyUsed (item installHint 1)) "."))
 									)
 
 								(scrSetDesc gScreen desc)
